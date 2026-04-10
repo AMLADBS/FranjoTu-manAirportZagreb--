@@ -3,69 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Priority Manifest: AMLA & Europol Mission</title>
+    <title>Zagreb Airport - Secure Portal</title>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #050a14; padding: 40px; display: flex; justify-content: center; }
-        .ticket { background: white; width: 600px; border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); overflow: hidden; border-top: 10px solid #002d72; }
-        .header { background: #002d72; color: white; padding: 25px; text-align: center; }
-        .mission-status { background: #ffcc00; color: #000; padding: 5px 15px; font-weight: bold; font-size: 0.75rem; border-radius: 20px; margin-top: 10px; display: inline-block; }
-        .content { padding: 30px; position: relative; }
-        .passenger-row { display: flex; justify-content: space-between; border-bottom: 2px solid #f0f0f0; padding: 15px 0; }
-        .seat-badge { background: #002d72; color: #fff; padding: 10px; border-radius: 5px; text-align: center; min-width: 45px; }
-        .route { display: flex; justify-content: space-between; align-items: center; margin: 30px 0; text-align: center; }
-        .city h2 { margin: 0; font-size: 2.2rem; color: #002d72; }
-        .label { font-size: 0.65rem; color: #888; text-transform: uppercase; font-weight: bold; }
-        .value { font-weight: bold; color: #222; font-size: 1rem; display: block; }
-        .cost-section { margin-top: 20px; background: #fdf6e3; padding: 20px; border-radius: 5px; border: 1px solid #eee8d5; display: flex; justify-content: space-between; align-items: center; }
-        .amla-seal { position: absolute; bottom: 100px; right: 40px; border: 3px solid rgba(204, 0, 0, 0.2); color: rgba(204, 0, 0, 0.2); padding: 10px; font-weight: 900; transform: rotate(-15deg); border-radius: 5px; font-size: 0.8rem; pointer-events: none; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; color: #333; overflow-x: hidden; }
+        
+        /* Navbar */
+        .navbar { background: #0056b3; color: white; padding: 15px 50px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .logo { font-weight: 900; font-size: 1.2rem; letter-spacing: -1px; line-height: 1; }
+        .nav-links { display: flex; gap: 25px; }
+        .nav-item { font-size: 0.85rem; font-weight: 600; opacity: 0.9; }
+
+        /* Home Container */
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; position: relative; }
+        .airline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .airline-card { background: #f1f1f1; padding: 25px; border-radius: 4px; font-weight: 700; color: #999; border: 1px solid #ddd; cursor: not-allowed; }
+        .active-trigger { background: #fff !important; color: #0056b3 !important; border: 2px solid #0056b3 !important; cursor: pointer !important; box-shadow: 0 4px 15px rgba(0,86,179,0.2); transition: 0.3s; }
+        .active-trigger:hover { transform: scale(1.02); background: #f0f7ff !important; }
+
+        /* Arrow */
+        .arrow-pointer { position: absolute; right: 48%; top: 175px; font-size: 2.5rem; color: #ff0000; animation: pointLeft 0.8s infinite alternate; z-index: 10; pointer-events: none; }
+        @keyframes pointLeft { from { transform: translateX(0); } to { transform: translateX(-15px); } }
+
+        /* Full Screen Loading */
+        #loadingScreen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 60px; height: 60px; border: 6px solid #f3f3f3; border-top: 6px solid #0056b3; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* FULL SCREEN MANIFEST */
+        #missionDetails { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 2000; overflow-y: auto; padding: 0; }
+        .secure-doc-full { width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
+        .doc-header { background: #003399; color: white; padding: 40px; text-align: center; border-bottom: 8px solid #ffd700; }
+        .body-padding { padding: 50px 10%; flex-grow: 1; }
+        
+        .section-label { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 25px; border-radius: 8px; }
+        .val { font-weight: 900; color: #003399; font-size: 1.4rem; display: block; margin-top: 5px; }
+        
+        .cost-footer { background: #fffbeb; border: 2px solid #fde68a; padding: 30px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
+        .price { font-size: 3rem; font-weight: 900; color: #003399; }
+        .refundable { background: #059669; color: white; padding: 6px 12px; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; }
+        
+        .back-btn { position: fixed; top: 20px; left: 20px; padding: 10px 20px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; border-radius: 4px; cursor: pointer; font-weight: bold; z-index: 2001; }
+        .back-btn:hover { background: white; color: #003399; }
     </style>
 </head>
 <body>
 
-<div class="ticket">
-    <div class="header">
-        <div style="font-size: 0.8rem; letter-spacing: 2px;">OFFICE OF THE PRESIDENT - AMLA</div>
-        <h2 style="margin:5px 0;">TRAVEL AUTHORIZATION</h2>
-        <div class="mission-status">EUROPOL OPERATIONAL PRIORITY</div>
-    </div>
-
-    <div class="content">
-        <div class="amla-seal">APPROVED BY PRESIDENT, AMLA</div>
-
-        <div class="passenger-row">
-            <div><span class="label">Primary Subject</span><span class="value">BRANKO MILOS</span></div>
-            <div class="seat-badge"><span style="font-size:0.5rem; display:block;">SEAT</span><strong>1A</strong></div>
+    <!-- Home View -->
+    <div id="homeView">
+        <div class="navbar">
+            <div class="logo">ZAG ZAGREB<br><small style="font-size: 0.6rem; letter-spacing: 1px;">AIRPORT</small></div>
+            <div class="nav-links"><div class="nav-item">Flight Information</div></div>
         </div>
-
-        <div class="passenger-row">
-            <div><span class="label">Escort Authority</span><span class="value">MARU SANCHEZ</span></div>
-            <div class="seat-badge"><span style="font-size:0.5rem; display:block;">SEAT</span><strong>1B</strong></div>
-        </div>
-
-        <div class="route">
-            <div class="city"><h2>ZAG</h2><p>Zagreb</p><span class="label">SUN 19:00</span></div>
-            <div style="flex-grow: 1; border-top: 2px dashed #002d72; margin: 0 20px; position: relative;">
-                <span style="position: absolute; top: -15px; left: 45%;">✈️</span>
-                <span style="font-size: 0.6rem; color: #666; display: block; margin-top: 10px;">~2 HOURS DURATION</span>
+        <div class="container">
+            <div class="arrow-pointer">⬅️ <span style="font-size: 0.8rem; font-weight: 900; vertical-align: middle;">ACCESS DETAILS</span></div>
+            <h3 style="color: #0056b3; margin-bottom: 30px;">Select Carrier for Security Access</h3>
+            <div class="airline-grid">
+                <div class="airline-card">Aegean Airlines</div>
+                <div class="airline-card">Air Serbia</div>
+                <div class="airline-card active-trigger" onclick="startLoading()">Croatia Airlines</div>
+                <div class="airline-card">Lufthansa</div>
+                <div class="airline-card">Qatar Airways</div>
+                <div class="airline-card">Turkish Airlines</div>
             </div>
-            <div class="city"><h2>HAM</h2><p>Hamburg</p><span class="label">MON 22:00 (RT)</span></div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-            <div><span class="label">Carrier</span><span class="value">Croatia Airlines (OU)</span></div>
-            <div style="text-align: right;"><span class="label">Service Class</span><span class="value">Rush / Priority 1</span></div>
-        </div>
-
-        <div class="cost-section">
-            <div><span class="label">Individual Fare</span><br><span class="value">₱880.00</span></div>
-            <div style="text-align: right;"><span class="label">Total Rush Settlement (2 PAX)</span><br><span class="value" style="font-size: 1.5rem; color: #002d72;">₱1,760.00</span></div>
         </div>
     </div>
 
-    <div style="background: #002d72; color: #fff; padding: 10px; font-size: 0.65rem; text-align: center;">
-        SYSTEM SECURED BY AMLA FINANCIAL INTELLIGENCE UNIT | APRIL 11, 2026
+    <!-- Full Screen Loading -->
+    <div id="loadingScreen">
+        <div class="spinner"></div>
+        <h2 style="color: #003399; margin-top: 20px;">SECURITY CLEARANCE IN PROGRESS</h2>
+        <p style="color: #666;">Verifying AMLA Presidential Authorization...</p>
     </div>
-</div>
 
+    <!-- Full Screen Manifest -->
+    <div id="missionDetails">
+        <button class="back-btn" onclick="location.reload()">← EXIT SECURE VIEW</button>
+        <div class="secure-doc-full">
+            <div class="doc-header">
+                <div style="font-size: 0.9rem; letter-spacing: 4px; opacity: 0.9; font-weight: bold;">ANTI-MONEY LAUNDERING COUNCIL</div>
+                <h1 style="margin:10px 0; font-size: 2.5rem;">OFFICIAL MISSION MANIFEST</h1>
+                <div style="background: #ffd700; color: #003399; display: inline-block; padding: 5px 20px; font-weight: 900; border-radius: 50px; font-size: 0.8rem;">EUROPOL PRIORITY 1-A</div>
+            </div>
+
+            <div class="body-padding">
+                <div style="background: #fef2f2; border-left: 10px solid #dc2626; padding: 25px; margin-bottom: 40px;">
+                    <h2 style="margin:0; color: #991b1b;">PRIVATE MISSION: HAMBURG STRATEGIC MEETING</h2>
+                    <p style="color: #b91c1c; font-weight: bold; margin: 10px 0 0;">CONFIDENTIAL ACCESS ONLY — AMLA PRESIDENTIAL DELEGATION</p>
+                </div>
+
+                <div class="section-label">Personnel Clearances</div>
+                <div class="grid-2">
+                    <div class="card">
+                        <span style="font-size: 0.8rem; color: #64748b; font-weight: bold;">PRIMARY SUBJECT</span>
+                        <span class="val">BRANKO MILOS</span>
+                        <p style="color: #003399; font-weight: bold;">SEAT 1A (PRIORITY WINDOW)</p>
+                    </div>
+                    <div class="card">
+                        <span style="font-size: 0.8rem; color: #64748b; font-weight: bold;">ESCORT AUTHORITY</span>
+                        <span class="val">MARU SANCHEZ</span>
+                        <p style="color: #003399; font-weight: bold;">SEAT 1B (PRIORITY AISLE)</p>
+                    </div>
+                </div>
+
+                <div class="section-label">Mission Logistics</div>
+                <div class="grid-2">
+                    <div class="card">
+                        <span style="font-size: 0.8rem; color: #64748b; font-weight: bold;">OUTBOUND: ZAG ➔ HAM</span>
+                        <span class="val">12 APR 2026 | 19:00 HRS</span>
+                        <p>Flight: Croatia Airlines OU 4426</p>
+                    </div>
+                    <div class="card">
+                        <span style="font-size: 0.8rem; color: #64748b; font-weight: bold;">RETURN: HAM ➔ ZAG</span>
+                        <span class="val">13 APR 2026 | 22:00 HRS</span>
+                        <p>Flight: Croatia Airlines OU 4427</p>
+                    </div>
+                </div>
+
+                <div class="cost-footer">
+                    <div>
+                        <span class="refundable">Full Refundable Mission Fare</span>
+                        <p style="font-weight: bold; margin-top: 15px; font-size: 1.1rem; color: #92400e;">Authorized Operational Expenditure</p>
+                    </div>
+                    <div class="price">€1,760.00</div>
+                </div>
+            </div>
+            
+            <div style="background: #003399; color: white; padding: 20px; text-align: center; font-weight: bold; letter-spacing: 2px; font-size: 0.7rem;">
+                SECURED BY AMLA FINANCIAL INTELLIGENCE UNIT | ENCRYPTION LEVEL: MIL-SPEC
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startLoading() {
+            document.getElementById('homeView').style.display = 'none';
+            document.getElementById('loadingScreen').style.display = 'flex';
+
+            setTimeout(function() {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('missionDetails').style.display = 'block';
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
